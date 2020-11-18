@@ -1,9 +1,10 @@
+use bit_field::BitField;
+use bitflags::_core::fmt::Formatter;
 use core::convert::{Into, TryInto};
 use core::fmt;
-use bit_field::BitField;
-use ux::{u9, u12, u21};
-use core::ops;
 use core::hash::Hash;
+use core::ops;
+use ux::{u12, u21, u9};
 
 pub const PAGE_SIZE_4KIB: u64 = 0x0000_1000;
 pub const PAGE_SIZE_2MIB: u64 = 0x0020_0000;
@@ -188,6 +189,13 @@ impl ops::Add<u64> for VirtAddr {
     }
 }
 
+impl ops::Add<usize> for VirtAddr {
+    type Output = Self;
+    fn add(self, rhs: usize) -> Self::Output {
+        self + cast::u64(rhs)
+    }
+}
+
 impl ops::AddAssign for VirtAddr {
     fn add_assign(&mut self, other: VirtAddr) {
         *self = VirtAddr::from(self.0 + other.0);
@@ -200,11 +208,17 @@ impl ops::AddAssign<u64> for VirtAddr {
     }
 }
 
+impl ops::AddAssign<usize> for VirtAddr {
+    fn add_assign(&mut self, rhs: usize) {
+        self.add_assign(cast::u64(rhs))
+    }
+}
+
 impl ops::Sub for VirtAddr {
-    type Output = VirtAddr;
+    type Output = u64;
 
     fn sub(self, rhs: VirtAddr) -> Self::Output {
-        VirtAddr::from(self.0 - rhs.0)
+        self.0 - rhs.0
     }
 }
 
@@ -213,6 +227,25 @@ impl ops::Sub<u64> for VirtAddr {
 
     fn sub(self, rhs: u64) -> Self::Output {
         VirtAddr::from(self.0 - rhs)
+    }
+}
+
+impl ops::Sub<usize> for VirtAddr {
+    type Output = Self;
+    fn sub(self, rhs: usize) -> Self::Output {
+        self - cast::u64(rhs)
+    }
+}
+
+impl ops::SubAssign<u64> for VirtAddr {
+    fn sub_assign(&mut self, rhs: u64) {
+        *self = *self - rhs;
+    }
+}
+
+impl ops::SubAssign<usize> for VirtAddr {
+    fn sub_assign(&mut self, rhs: usize) {
+        self.sub_assign(cast::u64(rhs))
     }
 }
 
@@ -285,8 +318,8 @@ impl fmt::Display for VirtAddr {
 }
 
 impl fmt::Debug for VirtAddr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:#x}", self.0)
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        write!(f, "VirtAddr({:#x})", self.0)
     }
 }
 
@@ -402,6 +435,13 @@ impl ops::Add<u64> for PhysAddr {
     }
 }
 
+impl ops::Add<usize> for PhysAddr {
+    type Output = Self;
+    fn add(self, rhs: usize) -> Self::Output {
+        self + cast::u64(rhs)
+    }
+}
+
 impl ops::AddAssign for PhysAddr {
     fn add_assign(&mut self, other: PhysAddr) {
         *self = PhysAddr::from(self.0 + other.0);
@@ -411,6 +451,12 @@ impl ops::AddAssign for PhysAddr {
 impl ops::AddAssign<u64> for PhysAddr {
     fn add_assign(&mut self, offset: u64) {
         *self = PhysAddr::from(self.0 + offset);
+    }
+}
+
+impl ops::AddAssign<usize> for PhysAddr {
+    fn add_assign(&mut self, rhs: usize) {
+        self.add_assign(cast::u64(rhs))
     }
 }
 
@@ -427,6 +473,25 @@ impl ops::Sub<u64> for PhysAddr {
 
     fn sub(self, rhs: u64) -> Self::Output {
         PhysAddr::from(self.0 - rhs)
+    }
+}
+
+impl ops::Sub<usize> for PhysAddr {
+    type Output = Self;
+    fn sub(self, rhs: usize) -> Self::Output {
+        self - cast::u64(rhs)
+    }
+}
+
+impl ops::SubAssign<u64> for PhysAddr {
+    fn sub_assign(&mut self, rhs: u64) {
+        *self = *self - rhs;
+    }
+}
+
+impl ops::SubAssign<usize> for PhysAddr {
+    fn sub_assign(&mut self, rhs: usize) {
+        self.sub_assign(cast::u64(rhs))
     }
 }
 
@@ -500,7 +565,7 @@ impl fmt::Display for PhysAddr {
 
 impl fmt::Debug for PhysAddr {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:#x}", self.0)
+        write!(f, "PhysAddr({:#x})", self.0)
     }
 }
 
@@ -528,7 +593,6 @@ impl fmt::Pointer for PhysAddr {
         self.0.fmt(f)
     }
 }
-
 
 /// Align address downwards.
 ///
