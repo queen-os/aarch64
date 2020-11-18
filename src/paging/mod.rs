@@ -1,4 +1,8 @@
+pub mod frame;
 pub mod page;
+
+pub use frame::Frame;
+pub use page::Page;
 
 /// Trait for abstracting over the three possible block/page sizes on aarch64, 4KiB, 2MiB, 1GiB.
 pub trait PageSize: Copy + Eq + PartialOrd + Ord {

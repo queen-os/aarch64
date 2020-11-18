@@ -20,7 +20,7 @@ impl<S: PageSize> Page<S> {
 
     /// Returns the page that starts at the given virtual address.
     ///
-    /// Returns an error if the address is not correctly aligned (i.e. is not a valid page start).
+    /// Returns `None` if the address is not correctly aligned (i.e. is not a valid page start).
     pub fn from_start_address(address: VirtAddr) -> Option<Self> {
         address
             .is_aligned(S::SIZE)

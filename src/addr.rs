@@ -461,10 +461,10 @@ impl ops::AddAssign<usize> for PhysAddr {
 }
 
 impl ops::Sub for PhysAddr {
-    type Output = PhysAddr;
+    type Output = u64;
 
     fn sub(self, rhs: PhysAddr) -> Self::Output {
-        PhysAddr::from(self.0 - rhs.0)
+        self.0 - rhs.0
     }
 }
 
