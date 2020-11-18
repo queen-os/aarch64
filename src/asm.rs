@@ -26,3 +26,11 @@ pub unsafe fn pc() -> usize {
 pub fn cpuid() -> usize {
     (cortex_a::regs::MPIDR_EL1.get() & 3) as usize
 }
+
+/// # Safety
+///
+/// The halt function stops the processor until the next interrupt arrives
+#[inline(always)]
+pub unsafe fn halt() {
+    asm!("wfi", options(nomem, nostack));
+}
