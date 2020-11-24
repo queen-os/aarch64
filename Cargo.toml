@@ -10,6 +10,7 @@ edition = "2018"
 cortex-a = "4.1"
 bit_field = "0.10"
 bitflags = "1.2"
+register = "0.5"
 
 [dependencies.cast]
 version = "0.2"

@@ -1,5 +1,6 @@
 pub mod frame;
 pub mod page;
+pub mod table;
 
 pub use frame::Frame;
 pub use page::Page;
