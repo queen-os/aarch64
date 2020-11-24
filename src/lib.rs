@@ -9,7 +9,9 @@
 pub mod addr;
 pub mod asm;
 pub mod paging;
+pub mod cache;
+pub mod registers;
+pub mod barrier;
 
-pub use cortex_a::*;
 
 pub extern crate ux;
