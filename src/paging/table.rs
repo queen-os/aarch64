@@ -10,8 +10,8 @@ use super::{Frame, PageSize, Size4KiB};
 use crate::addr::PhysAddr;
 
 /// Memory attribute fields mask
-pub const MEMORY_ATTR_MASK: u64 = (MEMORY_ATTRIBUTE::SH.mask << MEMORY_ATTRIBUTE::SH.shift)
-    | (MEMORY_ATTRIBUTE::AttrIndx.mask << MEMORY_ATTRIBUTE::AttrIndx.shift);
+pub const MEMORY_ATTR_MASK: u64 =
+    (0b11 << MEMORY_ATTRIBUTE::SH.shift) | (0b111 << MEMORY_ATTRIBUTE::AttrIndx.shift);
 /// Output address mask
 pub const ADDR_MASK: u64 = 0x0000_ffff_ffff_f000;
 /// Other flags mask
@@ -40,7 +40,7 @@ pub struct PageTableEntry {
 impl PageTableEntry {
     /// Returns whether this entry is zero.
     #[inline]
-    pub fn is_unused(&self) -> bool {
+    pub fn is_unused(self) -> bool {
         self.entry == 0
     }
 
@@ -52,25 +52,25 @@ impl PageTableEntry {
 
     /// Returns the flags of this entry.
     #[inline]
-    pub fn flags(&self) -> PageTableFlags {
+    pub fn flags(self) -> PageTableFlags {
         PageTableFlags::from_bits_truncate(self.entry)
     }
 
     /// Returns the physical address mapped by this entry, might be zero.
     #[inline]
-    pub fn addr(&self) -> PhysAddr {
+    pub fn addr(self) -> PhysAddr {
         PhysAddr::new(self.entry & ADDR_MASK)
     }
 
     /// Returns the memory attribute fields of this entry.
     #[inline]
-    pub fn attr(&self) -> PageTableAttribute {
+    pub fn attr(self) -> PageTableAttribute {
         PageTableAttribute::new(MEMORY_ATTR_MASK, 0, self.entry)
     }
 
     /// Returns whether this entry is mapped to a block.
     #[inline]
-    pub fn is_block(&self) -> bool {
+    pub fn is_block(self) -> bool {
         !self.flags().contains(PageTableFlags::TABLE_OR_PAGE)
     }
 
@@ -81,7 +81,7 @@ impl PageTableEntry {
     /// - `FrameError::FrameNotPresent` if the entry doesn't have the `PRESENT` flag set.
     /// - `FrameError::HugeFrame` if the entry has the `HUGE_PAGE` flag set (for huge pages the
     ///    `addr` function must be used)
-    pub fn frame(&self) -> Result<Frame, FrameError> {
+    pub fn frame(self) -> Result<Frame, FrameError> {
         if !self.flags().contains(PageTableFlags::VALID) {
             Err(FrameError::FrameNotPresent)
         } else if self.is_block() {
@@ -140,7 +140,7 @@ impl fmt::Debug for PageTableEntry {
     }
 }
 
-register_bitfields! { u64,
+register::register_bitfields! { u64,
     // Memory attribute fields in the VMSAv8-64 translation table format descriptors (Page 2148~2152)
     MEMORY_ATTRIBUTE [
         /// Shareability field
@@ -155,7 +155,7 @@ register_bitfields! { u64,
     ]
 }
 
-bitflags! {
+bitflags::bitflags! {
     /// Possible flags for a page table entry.
     pub struct PageTableFlags: u64 {
         /// identifies whether the descriptor is valid

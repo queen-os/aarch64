@@ -45,6 +45,7 @@ impl VirtAddr {
 
     /// Tries to create a new canonical virtual address.
     /// in aarch64, valid virtual address starts with 0x0000 or 0xffff.
+    #[inline]
     pub fn try_new(addr: u64) -> Option<Self> {
         match addr.get_bits(48..64) {
             0 | 0xffff => Some(VirtAddr(addr)),
@@ -68,18 +69,21 @@ impl VirtAddr {
     }
 
     /// Creates a virtual address from the given pointer
+    #[inline]
     pub fn from_ptr<T>(ptr: *const T) -> Self {
         Self::new(cast::u64(ptr as usize))
     }
 
     /// Converts the address to a raw pointer.
     #[cfg(target_pointer_width = "64")]
+    #[inline]
     pub fn as_ptr<T>(self) -> *const T {
         cast::usize(self.as_u64()) as *const T
     }
 
     /// Converts the address to a mutable raw pointer.
     #[cfg(target_pointer_width = "64")]
+    #[inline]
     pub fn as_mut_ptr<T>(self) -> *mut T {
         self.as_ptr::<T>() as *mut T
     }
@@ -87,6 +91,7 @@ impl VirtAddr {
     /// Aligns the virtual address upwards to the given alignment.
     ///
     /// See the `align_up` function for more information.
+    #[inline]
     pub fn align_up<U>(self, align: U) -> Self
         where
             U: Into<u64>,
@@ -97,6 +102,7 @@ impl VirtAddr {
     /// Aligns the virtual address downwards to the given alignment.
     ///
     /// See the `align_down` function for more information.
+    #[inline]
     pub fn align_down<U>(self, align: U) -> Self
         where
             U: Into<u64>,
@@ -105,6 +111,7 @@ impl VirtAddr {
     }
 
     /// Checks whether the virtual address has the demanded alignment.
+    #[inline]
     pub fn is_aligned<U>(self, align: U) -> bool
         where
             U: Into<u64>,
@@ -113,11 +120,13 @@ impl VirtAddr {
     }
 
     /// Offset within the 4 KiB page.
+    #[inline]
     pub fn page_offset(self) -> u12 {
         u12::new((self.0 & (PAGE_SIZE_4KIB - 1)) as u16)
     }
 
     /// Offset within the 2 MiB page.
+    #[inline]
     pub fn large_page_offset(self) -> u21 {
         u21::new((self.0 & (PAGE_SIZE_2MIB - 1)) as u32)
     }
@@ -132,6 +141,7 @@ impl VirtAddr {
     }
 
     /// Returns the top 16 bits
+    #[inline]
     pub fn va_range_bits(self) -> u16 {
         self.0.get_bits(48..64) as u16
     }
@@ -357,6 +367,7 @@ impl PhysAddr {
     /// Tries to create a new physical address.
     ///
     /// Fails if any bits in the range 52 to 64 are set.
+    #[inline]
     pub fn try_new(addr: u64) -> Option<Self> {
         match addr.get_bits(52..64) {
             0 => Some(PhysAddr(addr)), // valid
@@ -374,13 +385,14 @@ impl PhysAddr {
     }
 
     #[inline]
-    pub fn is_zero(&self) -> bool {
+    pub fn is_zero(self) -> bool {
         self.0 == 0
     }
 
     /// Aligns the physical address upwards to the given alignment.
     ///
     /// See the `align_up` function for more information.
+    #[inline]
     pub fn align_up<U>(self, align: U) -> Self
         where
             U: Into<u64>,
@@ -391,6 +403,7 @@ impl PhysAddr {
     /// Aligns the physical address downwards to the given alignment.
     ///
     /// See the `align_down` function for more information.
+    #[inline]
     pub fn align_down<U>(self, align: U) -> Self
         where
             U: Into<u64>,
@@ -399,6 +412,7 @@ impl PhysAddr {
     }
 
     /// Checks whether the physical address has the demanded alignment.
+    #[inline]
     pub fn is_aligned<U>(self, align: U) -> bool
         where
             U: Into<u64>,

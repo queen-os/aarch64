@@ -21,6 +21,7 @@ impl<S: PageSize> Page<S> {
     /// Returns the page that starts at the given virtual address.
     ///
     /// Returns `None` if the address is not correctly aligned (i.e. is not a valid page start).
+    #[inline]
     pub fn from_start_address(address: VirtAddr) -> Option<Self> {
         address
             .is_aligned(S::SIZE)
@@ -28,6 +29,7 @@ impl<S: PageSize> Page<S> {
     }
 
     /// Returns the page that contains the given virtual address.
+    #[inline]
     pub fn containing_address(address: VirtAddr) -> Self {
         Page {
             start_address: address.align_down(S::SIZE),
@@ -36,34 +38,40 @@ impl<S: PageSize> Page<S> {
     }
 
     /// Returns the start address of the page.
-    pub fn start_address(&self) -> VirtAddr {
+    #[inline]
+    pub fn start_address(self) -> VirtAddr {
         self.start_address
     }
 
     /// Returns the size the page (4KB, 2MB or 1GB).
-    pub const fn size(&self) -> u64 {
+    pub const fn size(self) -> u64 {
         S::SIZE
     }
 
     /// Returns the VA range
-    pub fn va_range(&self) -> Option<VirtAddrRange> {
+    #[inline]
+    pub fn va_range(self) -> Option<VirtAddrRange> {
         self.start_address().va_range()
     }
 
     /// Returns the level 4 page table index of this page.
-    pub fn p4_index(&self) -> u9 {
+    #[inline]
+    pub fn p4_index(self) -> u9 {
         self.start_address().p4_index()
     }
 
     /// Returns the level 3 page table index of this page.
-    pub fn p3_index(&self) -> u9 {
+    #[inline]
+    pub fn p3_index(self) -> u9 {
         self.start_address().p3_index()
     }
 
+    #[inline]
     pub fn of_addr(address: u64) -> Self {
         Self::containing_address(VirtAddr::new(address))
     }
 
+    #[inline]
     pub fn range_of(begin: u64, end: u64) -> Range<Self> {
         Page::of_addr(begin)..(Page::of_addr(end - 1) + 1)
     }
@@ -130,6 +138,7 @@ impl Page<Size4KiB> {
     }
 
     /// Returns the level 1 page table index of this page.
+    #[inline]
     pub fn p1_index(&self) -> u9 {
         self.start_address().p1_index()
     }

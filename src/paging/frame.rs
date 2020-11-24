@@ -17,6 +17,7 @@ impl<S: PageSize> Frame<S> {
     /// Returns the frame that starts at the given virtual address.
     ///
     /// Returns `None` if the address is not correctly aligned (i.e. is not a valid frame start).
+    #[inline]
     pub fn from_start_address(address: PhysAddr) -> Option<Self> {
         address
             .is_aligned(S::SIZE)
@@ -24,6 +25,7 @@ impl<S: PageSize> Frame<S> {
     }
 
     /// Returns the frame that contains the given physical address.
+    #[inline]
     pub fn containing_address(address: PhysAddr) -> Self {
         Frame {
             start_address: address.align_down(S::SIZE),
@@ -32,15 +34,17 @@ impl<S: PageSize> Frame<S> {
     }
 
     /// Returns the start address of the frame.
-    pub fn start_address(&self) -> PhysAddr {
+    #[inline]
+    pub fn start_address(self) -> PhysAddr {
         self.start_address
     }
 
     /// Returns the size the frame (4KB, 2MB or 1GB).
-    pub fn size(&self) -> u64 {
+    pub const fn size(&self) -> u64 {
         S::SIZE
     }
 
+    #[inline]
     pub fn of_addr(address: u64) -> Self {
         Self::containing_address(PhysAddr::new(address))
     }
