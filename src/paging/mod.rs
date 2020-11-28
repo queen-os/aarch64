@@ -1,9 +1,14 @@
+pub use frame::Frame;
+pub use frame_alloc::{FrameAllocator, FrameDeallocator};
+pub use mapper::{MappedPageTable, Mapper, MapperAllSizes, RecursivePageTable};
+pub use page::Page;
+pub use table::{PageTable, PageTableFlags};
+
 pub mod frame;
+mod frame_alloc;
+pub mod mapper;
 pub mod page;
 pub mod table;
-
-pub use frame::Frame;
-pub use page::Page;
 
 /// Trait for abstracting over the three possible block/page sizes on aarch64, 4KiB, 2MiB, 1GiB.
 pub trait PageSize: Copy + Eq + PartialOrd + Ord {

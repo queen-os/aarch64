@@ -1,8 +1,10 @@
 //! Abstractions for page tables and page table entries.
 #![allow(non_upper_case_globals)]
 
-use core::fmt;
-use core::ops::{Index, IndexMut};
+use core::{
+    fmt,
+    ops::{Index, IndexMut},
+};
 use register::FieldValue;
 use ux::*;
 
@@ -80,7 +82,7 @@ impl PageTableEntry {
     ///
     /// - `FrameError::FrameNotPresent` if the entry doesn't have the `PRESENT` flag set.
     /// - `FrameError::HugeFrame` if the entry has the `HUGE_PAGE` flag set (for huge pages the
-    ///    `addr` function must be used)
+    ///   `addr` function must be used)
     pub fn frame(self) -> Result<Frame, FrameError> {
         if !self.flags().contains(PageTableFlags::VALID) {
             Err(FrameError::FrameNotPresent)
@@ -92,7 +94,8 @@ impl PageTableEntry {
         }
     }
 
-    /// Map the entry to the specified physical address with the specified flags and memory attribute.
+    /// Map the entry to the specified physical address with the specified flags and memory
+    /// attribute.
     pub fn set_addr(&mut self, addr: PhysAddr, flags: PageTableFlags, attr: PageTableAttribute) {
         debug_assert!(addr.is_aligned(Size4KiB::SIZE));
         self.entry = (addr.as_u64()) | flags.bits() | attr.value;
@@ -249,11 +252,14 @@ impl Default for PageTable {
 
 impl PageTable {
     /// Create a empty page table.
+    #[inline]
     pub fn new() -> Self {
         Self::default()
     }
 
     /// Clears all entries.
+    #[doc(alias = "zero")]
+    #[inline]
     pub fn clear(&mut self) {
         for entry in self.entries.iter_mut() {
             entry.set_unused();
@@ -261,12 +267,14 @@ impl PageTable {
     }
 
     /// Returns an iterator over the entries of the page table.
-    pub fn iter(&self) -> impl Iterator<Item=&PageTableEntry> {
+    #[inline]
+    pub fn iter(&self) -> impl Iterator<Item = &PageTableEntry> {
         self.entries.iter()
     }
 
     /// Returns an iterator that allows modifying the entries of the page table.
-    pub fn iter_mut(&mut self) -> impl Iterator<Item=&mut PageTableEntry> {
+    #[inline]
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut PageTableEntry> {
         self.entries.iter_mut()
     }
 }
