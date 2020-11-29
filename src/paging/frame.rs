@@ -6,7 +6,7 @@ use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Sub, SubAssign};
 
 /// A physical memory frame.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(C)]
 pub struct Frame<S: PageSize = Size4KiB> {
     start_address: PhysAddr,

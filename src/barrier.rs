@@ -10,6 +10,7 @@
 //
 // https://github.com/rust-lang-nursery/stdsimd/pull/557
 
+#[allow(clippy::missing_safety_doc)]
 pub mod sealed {
     pub trait Dmb {
         unsafe fn __dmb(&self);

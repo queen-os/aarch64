@@ -130,6 +130,7 @@ impl<'a, P: PhysToVirt> MappedPageTable<'a, P> {
 }
 
 impl<'a, P: PhysToVirt> Mapper<Size1GiB> for MappedPageTable<'a, P> {
+    #[inline]
     unsafe fn map_to<A>(
         &mut self,
         page: Page<Size1GiB>,
@@ -164,13 +165,20 @@ impl<'a, P: PhysToVirt> Mapper<Size1GiB> for MappedPageTable<'a, P> {
     }
 
     fn get_entry(&self, page: Page<Size1GiB>) -> Result<&PageTableEntry, EntryGetError> {
-        let p4 = self.level_4_table;
+        let p4 = &self.level_4_table;
         let p3 = self.page_table_walker.next_table(&p4[page.p4_index()])?;
         Ok(&p3[page.p3_index()])
+    }
+
+    fn get_entry_mut(&mut self, page: Page<Size1GiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+        let p4 = &mut self.level_4_table;
+        let p3 = self.page_table_walker.next_table_mut(&mut p4[page.p4_index()])?;
+        Ok(&mut p3[page.p3_index()])
     }
 }
 
 impl<'a, P: PhysToVirt> Mapper<Size2MiB> for MappedPageTable<'a, P> {
+    #[inline]
     unsafe fn map_to<A>(
         &mut self,
         page: Page<Size2MiB>,
@@ -205,14 +213,22 @@ impl<'a, P: PhysToVirt> Mapper<Size2MiB> for MappedPageTable<'a, P> {
     }
 
     fn get_entry(&self, page: Page<Size2MiB>) -> Result<&PageTableEntry, EntryGetError> {
-        let p4 = self.level_4_table;
+        let p4 = &self.level_4_table;
         let p3 = self.page_table_walker.next_table(&p4[page.p4_index()])?;
         let p2 = self.page_table_walker.next_table(&p3[page.p3_index()])?;
         Ok(&p2[page.p2_index()])
     }
+
+    fn get_entry_mut(&mut self, page: Page<Size2MiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+        let p4 = &mut self.level_4_table;
+        let p3 = self.page_table_walker.next_table_mut(&mut p4[page.p4_index()])?;
+        let p2 = self.page_table_walker.next_table_mut(&mut p3[page.p3_index()])?;
+        Ok(&mut p2[page.p2_index()])
+    }
 }
 
 impl<'a, P: PhysToVirt> Mapper<Size4KiB> for MappedPageTable<'a, P> {
+    #[inline]
     unsafe fn map_to<A>(
         &mut self,
         page: Page<Size4KiB>,
@@ -247,17 +263,25 @@ impl<'a, P: PhysToVirt> Mapper<Size4KiB> for MappedPageTable<'a, P> {
     }
 
     fn get_entry(&self, page: Page<Size4KiB>) -> Result<&PageTableEntry, EntryGetError> {
-        let p4 = self.level_4_table;
+        let p4 = &self.level_4_table;
         let p3 = self.page_table_walker.next_table(&p4[page.p4_index()])?;
         let p2 = self.page_table_walker.next_table(&p3[page.p3_index()])?;
         let p1 = self.page_table_walker.next_table(&p2[page.p2_index()])?;
         Ok(&p1[page.p1_index()])
     }
+
+    fn get_entry_mut(&mut self, page: Page<Size4KiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+        let p4 = &mut self.level_4_table;
+        let p3 = self.page_table_walker.next_table_mut(&mut p4[page.p4_index()])?;
+        let p2 = self.page_table_walker.next_table_mut(&mut p3[page.p3_index()])?;
+        let p1 = self.page_table_walker.next_table_mut(&mut p2[page.p2_index()])?;
+        Ok(&mut p1[page.p1_index()])
+    }
 }
 
 impl<'a, P: PhysToVirt> MapperAllSizes for MappedPageTable<'a, P> {
     fn translate(&self, addr: VirtAddr) -> TranslateResult {
-        let p4 = self.level_4_table;
+        let p4 = &self.level_4_table;
         let p3 = match self.page_table_walker.next_table(&p4[addr.p4_index()]) {
             Ok(page_table) => page_table,
             Err(PageTableWalkError::NotMapped) => return TranslateResult::PageNotMapped,
@@ -318,7 +342,7 @@ impl<P: PhysToVirt> PageTableWalker<P> {
         &self,
         entry: &'b PageTableEntry,
     ) -> Result<&'b PageTable, PageTableWalkError> {
-        let page_table_ptr = (self.phys_to_virt)(entry.frame()?);
+        let page_table_ptr = self.phys_to_virt.phys_to_virt(entry.frame()?);
         let page_table: &PageTable = unsafe { &*page_table_ptr };
 
         Ok(page_table)
@@ -333,7 +357,7 @@ impl<P: PhysToVirt> PageTableWalker<P> {
         &self,
         entry: &'b mut PageTableEntry,
     ) -> Result<&'b mut PageTable, PageTableWalkError> {
-        let page_table_ptr = (self.phys_to_virt)(entry.frame()?);
+        let page_table_ptr = self.phys_to_virt.phys_to_virt(entry.frame()?);
         let page_table: &mut PageTable = unsafe { &mut *page_table_ptr };
 
         Ok(page_table)

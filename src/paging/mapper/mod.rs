@@ -84,7 +84,7 @@ pub trait Mapper<S: PageSize> {
     ///
     /// This function might need additional physical frames to create new page tables. These
     /// frames are allocated from the `allocator` argument. At most three frames are required.
-    ///
+    /// ## Safety
     /// This function is unsafe because the caller must guarantee that passed `frame` is
     /// unused, i.e. not used for any other mappings.
     unsafe fn map_to<A>(
@@ -102,11 +102,7 @@ pub trait Mapper<S: PageSize> {
     fn get_entry(&self, page: Page<S>) -> Result<&PageTableEntry, EntryGetError>;
 
     /// Get the mutable reference of the specified `page` entry
-    fn get_entry_mut(&mut self, page: Page<S>) -> Result<&mut PageTableEntry, EntryGetError> {
-        let entry = self.get_entry(page)?;
-        let entry_mut = unsafe { &mut *(entry as *const _ as *mut PageTableEntry) };
-        Ok(entry_mut)
-    }
+    fn get_entry_mut(&mut self, page: Page<S>) -> Result<&mut PageTableEntry, EntryGetError>;
 
     /// Removes a mapping from the page table and returns the frame that used to be mapped.
     ///
@@ -137,11 +133,11 @@ pub trait Mapper<S: PageSize> {
             return Err(TranslateError::PageNotMapped);
         }
         Frame::from_start_address(entry.addr())
-            .ok_or(TranslateError::InvalidFrameAddress(entry.addr()))
+            .ok_or_else(|| TranslateError::InvalidFrameAddress(entry.addr()))
     }
 
     /// Maps the given frame to the virtual page with the same address.
-    ///
+    /// ## Safety
     /// This function is unsafe because the caller must guarantee that the passed `frame` is
     /// unused, i.e. not used for any other mappings.
     unsafe fn identity_map<A>(

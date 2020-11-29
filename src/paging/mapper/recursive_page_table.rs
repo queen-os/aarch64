@@ -157,10 +157,64 @@ impl RecursivePageTable {
             page.p2_index(),
         )
     }
-}
 
-impl Mapper<Size4KiB> for RecursivePageTable {
-    unsafe fn map_to<A>(
+    /// Helper function for implementing Mapper.
+    unsafe fn map_to_1gib<A>(
+        &mut self,
+        page: Page<Size1GiB>,
+        frame: Frame<Size1GiB>,
+        flags: PageTableFlags,
+        attr: PageTableAttribute,
+        allocator: &mut A,
+    ) -> Result<MapperFlush<Size1GiB>, MapToError>
+    where
+        A: FrameAllocator<Size4KiB>,
+    {
+        let p4 = &mut *(self.p4_ptr(page));
+
+        let p3_page = self.p3_page(page);
+        let p3 = Self::create_next_table(&mut p4[page.p4_index()], p3_page, allocator)?;
+
+        if !p3[page.p3_index()].is_unused() {
+            return Err(MapToError::PageAlreadyMapped);
+        }
+
+        p3[page.p3_index()].set_block::<Size1GiB>(frame.start_address(), flags, attr);
+
+        Ok(MapperFlush::new(page))
+    }
+
+    /// Helper function for implementing Mapper.
+    unsafe fn map_to_2mib<A>(
+        &mut self,
+        page: Page<Size2MiB>,
+        frame: Frame<Size2MiB>,
+        flags: PageTableFlags,
+        attr: PageTableAttribute,
+        allocator: &mut A,
+    ) -> Result<MapperFlush<Size2MiB>, MapToError>
+    where
+        A: FrameAllocator<Size4KiB>,
+    {
+        let p4 = &mut *(self.p4_ptr(page));
+
+        let p3_page = self.p3_page(page);
+        let p3 = Self::create_next_table(&mut p4[page.p4_index()], p3_page, allocator)?;
+
+        let p2_page = self.p2_page(page);
+        let p2 = Self::create_next_table(&mut p3[page.p3_index()], p2_page, allocator)?;
+
+        if !p2[page.p2_index()].is_unused() {
+            return Err(MapToError::PageAlreadyMapped);
+        }
+
+        p2[page.p2_index()].set_block::<Size2MiB>(frame.start_address(), flags, attr);
+
+        Ok(MapperFlush::new(page))
+    }
+
+    /// Helper function for implementing Mapper.
+    unsafe fn map_to_4kib<A>(
         &mut self,
         page: Page<Size4KiB>,
         frame: Frame<Size4KiB>,
@@ -189,6 +243,198 @@ impl Mapper<Size4KiB> for RecursivePageTable {
 
         Ok(MapperFlush::new(page))
     }
+}
+
+impl Mapper<Size1GiB> for RecursivePageTable {
+    #[inline]
+    unsafe fn map_to<A>(
+        &mut self,
+        page: Page<Size1GiB>,
+        frame: Frame<Size1GiB>,
+        flags: PageTableFlags,
+        attr: PageTableAttribute,
+        allocator: &mut A,
+    ) -> Result<MapperFlush<Size1GiB>, MapToError>
+    where
+        A: FrameAllocator<Size4KiB>,
+    {
+        self.map_to_1gib(page, frame, flags, attr, allocator)
+    }
+
+    fn get_entry(&self, page: Page<Size1GiB>) -> Result<&PageTableEntry, EntryGetError> {
+        let p4 = unsafe { &mut *(self.p4_ptr(page)) };
+
+        if p4[page.p4_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p3 = unsafe { &mut *(self.p3_ptr(page)) };
+
+        if p3[page.p3_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        Ok(&p3[page.p3_index()])
+    }
+
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size1GiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
+        let p4 = unsafe { &mut *(self.p4_ptr(page)) };
+
+        if p4[page.p4_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p3 = unsafe { &mut *(self.p3_ptr(page)) };
+
+        if p3[page.p3_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        Ok(&mut p3[page.p3_index()])
+    }
+
+    fn unmap(
+        &mut self,
+        page: Page<Size1GiB>,
+    ) -> Result<(Frame<Size1GiB>, MapperFlush<Size1GiB>), UnmapError> {
+        let p4 = unsafe { &mut *(self.p4_ptr(page)) };
+
+        let p4_entry = &p4[page.p4_index()];
+        p4_entry.frame().map_err(|err| match err {
+            FrameError::FrameNotPresent => UnmapError::PageNotMapped,
+            FrameError::HugeFrame => UnmapError::ParentEntryHugePage,
+        })?;
+
+        let p3 = unsafe { &mut *(self.p3_ptr(page)) };
+        let p3_entry = &mut p3[page.p3_index()];
+        p3_entry.frame().map_err(|err| match err {
+            FrameError::FrameNotPresent => UnmapError::PageNotMapped,
+            FrameError::HugeFrame => UnmapError::ParentEntryHugePage,
+        })?;
+
+        let frame = Frame::from_start_address(p3_entry.addr())
+            .ok_or_else(|| UnmapError::InvalidFrameAddress(p3_entry.addr()))?;
+
+        p3_entry.set_unused();
+        Ok((frame, MapperFlush::new(page)))
+    }
+}
+
+impl Mapper<Size2MiB> for RecursivePageTable {
+    #[inline]
+    unsafe fn map_to<A>(
+        &mut self,
+        page: Page<Size2MiB>,
+        frame: Frame<Size2MiB>,
+        flags: PageTableFlags,
+        attr: PageTableAttribute,
+        allocator: &mut A,
+    ) -> Result<MapperFlush<Size2MiB>, MapToError>
+    where
+        A: FrameAllocator<Size4KiB>,
+    {
+        self.map_to_2mib(page, frame, flags, attr, allocator)
+    }
+
+    fn get_entry(&self, page: Page<Size2MiB>) -> Result<&PageTableEntry, EntryGetError> {
+        let p4 = unsafe { &mut *(self.p4_ptr(page)) };
+
+        if p4[page.p4_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p3 = unsafe { &mut *(self.p3_ptr(page)) };
+
+        if p3[page.p3_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p2 = unsafe { &mut *(self.p2_ptr(page)) };
+
+        if p2[page.p2_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        Ok(&p2[page.p2_index()])
+    }
+
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size2MiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
+        let p4 = unsafe { &mut *(self.p4_ptr(page)) };
+
+        if p4[page.p4_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p3 = unsafe { &mut *(self.p3_ptr(page)) };
+
+        if p3[page.p3_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p2 = unsafe { &mut *(self.p2_ptr(page)) };
+
+        if p2[page.p2_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        Ok(&mut p2[page.p2_index()])
+    }
+
+    fn unmap(
+        &mut self,
+        page: Page<Size2MiB>,
+    ) -> Result<(Frame<Size2MiB>, MapperFlush<Size2MiB>), UnmapError> {
+        let p4 = unsafe { &mut *(self.p4_ptr(page)) };
+
+        let p4_entry = &p4[page.p4_index()];
+        p4_entry.frame().map_err(|err| match err {
+            FrameError::FrameNotPresent => UnmapError::PageNotMapped,
+            FrameError::HugeFrame => UnmapError::ParentEntryHugePage,
+        })?;
+
+        let p3 = unsafe { &mut *(self.p3_ptr(page)) };
+        let p3_entry = &p3[page.p3_index()];
+        p3_entry.frame().map_err(|err| match err {
+            FrameError::FrameNotPresent => UnmapError::PageNotMapped,
+            FrameError::HugeFrame => UnmapError::ParentEntryHugePage,
+        })?;
+
+        let p2 = unsafe { &mut *(self.p2_ptr(page)) };
+        let p2_entry = &mut p2[page.p2_index()];
+        p2_entry.frame().map_err(|err| match err {
+            FrameError::FrameNotPresent => UnmapError::PageNotMapped,
+            FrameError::HugeFrame => UnmapError::ParentEntryHugePage,
+        })?;
+
+        let frame = Frame::from_start_address(p2_entry.addr())
+            .ok_or_else(|| UnmapError::InvalidFrameAddress(p2_entry.addr()))?;
+
+        p2_entry.set_unused();
+        Ok((frame, MapperFlush::new(page)))
+    }
+}
+
+impl Mapper<Size4KiB> for RecursivePageTable {
+    #[inline]
+    unsafe fn map_to<A>(
+        &mut self,
+        page: Page<Size4KiB>,
+        frame: Frame<Size4KiB>,
+        flags: PageTableFlags,
+        attr: PageTableAttribute,
+        allocator: &mut A,
+    ) -> Result<MapperFlush<Size4KiB>, MapToError>
+    where
+        A: FrameAllocator<Size4KiB>,
+    {
+        self.map_to_4kib(page, frame, flags, attr, allocator)
+    }
 
     fn get_entry(&self, page: Page<Size4KiB>) -> Result<&PageTableEntry, EntryGetError> {
         let p4 = unsafe { &mut *(self.p4_ptr(page)) };
@@ -212,6 +458,33 @@ impl Mapper<Size4KiB> for RecursivePageTable {
         let p1 = unsafe { &mut *(self.p1_ptr(page)) };
 
         Ok(&p1[page.p1_index()])
+    }
+
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size4KiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
+        let p4 = unsafe { &mut *(self.p4_ptr(page)) };
+
+        if p4[page.p4_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p3 = unsafe { &mut *(self.p3_ptr(page)) };
+
+        if p3[page.p3_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p2 = unsafe { &mut *(self.p2_ptr(page)) };
+
+        if p2[page.p2_index()].is_unused() {
+            return Err(EntryGetError::PageNotMapped);
+        }
+
+        let p1 = unsafe { &mut *(self.p1_ptr(page)) };
+
+        Ok(&mut p1[page.p1_index()])
     }
 
     fn unmap(

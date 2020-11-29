@@ -80,17 +80,18 @@ impl<'a> Mapper<Size1GiB> for OffsetPageTable<'a> {
     }
 
     #[inline]
-    unsafe fn update_flags(
-        &mut self,
-        page: Page<Size1GiB>,
-        flags: PageTableFlags,
-    ) -> Result<MapperFlush<Size1GiB>, FlagUpdateError> {
-        self.inner.update_flags(page, flags)
+    fn translate_page(&self, page: Page<Size1GiB>) -> Result<Frame<Size1GiB>, TranslateError> {
+        self.inner.translate_page(page)
     }
 
     #[inline]
-    fn translate_page(&self, page: Page<Size1GiB>) -> Result<Frame<Size1GiB>, TranslateError> {
-        self.inner.translate_page(page)
+    fn get_entry(&self, page: Page<Size1GiB>) -> Result<&PageTableEntry, EntryGetError> {
+        self.inner.get_entry(page)
+    }
+
+    #[inline]
+    fn get_entry_mut(&mut self, page: Page<Size1GiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+        self.inner.get_entry_mut(page)
     }
 }
 
@@ -119,17 +120,18 @@ impl<'a> Mapper<Size2MiB> for OffsetPageTable<'a> {
     }
 
     #[inline]
-    unsafe fn update_flags(
-        &mut self,
-        page: Page<Size2MiB>,
-        flags: PageTableFlags,
-    ) -> Result<MapperFlush<Size2MiB>, FlagUpdateError> {
-        self.inner.update_flags(page, flags)
+    fn translate_page(&self, page: Page<Size2MiB>) -> Result<Frame<Size2MiB>, TranslateError> {
+        self.inner.translate_page(page)
     }
 
     #[inline]
-    fn translate_page(&self, page: Page<Size2MiB>) -> Result<Frame<Size2MiB>, TranslateError> {
-        self.inner.translate_page(page)
+    fn get_entry(&self, page: Page<Size2MiB>) -> Result<&PageTableEntry, EntryGetError> {
+        self.inner.get_entry(page)
+    }
+
+    #[inline]
+    fn get_entry_mut(&mut self, page: Page<Size2MiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+        self.inner.get_entry_mut(page)
     }
 }
 
@@ -158,17 +160,18 @@ impl<'a> Mapper<Size4KiB> for OffsetPageTable<'a> {
     }
 
     #[inline]
-    unsafe fn update_flags(
-        &mut self,
-        page: Page<Size4KiB>,
-        flags: PageTableFlags,
-    ) -> Result<MapperFlush<Size4KiB>, FlagUpdateError> {
-        self.inner.update_flags(page, flags)
+    fn translate_page(&self, page: Page<Size4KiB>) -> Result<Frame<Size4KiB>, TranslateError> {
+        self.inner.translate_page(page)
     }
 
     #[inline]
-    fn translate_page(&self, page: Page<Size4KiB>) -> Result<Frame<Size4KiB>, TranslateError> {
-        self.inner.translate_page(page)
+    fn get_entry(&self, page: Page<Size4KiB>) -> Result<&PageTableEntry, EntryGetError> {
+        self.inner.get_entry(page)
+    }
+
+    #[inline]
+    fn get_entry_mut(&mut self, page: Page<Size4KiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+        self.inner.get_entry_mut(page)
     }
 }
 
