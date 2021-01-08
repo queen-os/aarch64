@@ -145,7 +145,7 @@ impl fmt::Debug for PageTableEntry {
 
 register::register_bitfields! { u64,
     // Memory attribute fields in the VMSAv8-64 translation table format descriptors (Page 2148~2152)
-    MEMORY_ATTRIBUTE [
+    pub MEMORY_ATTRIBUTE [
         /// Shareability field
         SH       OFFSET(8) NUMBITS(2) [
             NonShareable = 0b00,

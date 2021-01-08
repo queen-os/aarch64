@@ -6,9 +6,9 @@ use core::hash::Hash;
 use core::ops;
 use ux::{u12, u21, u9};
 
-pub const PAGE_SIZE_4KIB: u64 = 0x0000_1000;
-pub const PAGE_SIZE_2MIB: u64 = 0x0020_0000;
-pub const PAGE_SIZE_1GIB: u64 = 0x4000_0000;
+pub const ALIGN_4KIB: u64 = 0x0000_1000;
+pub const ALIGN_2MIB: u64 = 0x0020_0000;
+pub const ALIGN_1GIB: u64 = 0x4000_0000;
 
 #[derive(Clone, Copy, Debug)]
 #[repr(u8)]
@@ -122,13 +122,13 @@ impl VirtAddr {
     /// Offset within the 4 KiB page.
     #[inline]
     pub fn page_offset(self) -> u12 {
-        u12::new((self.0 & (PAGE_SIZE_4KIB - 1)) as u16)
+        u12::new((self.0 & (ALIGN_4KIB - 1)) as u16)
     }
 
     /// Offset within the 2 MiB page.
     #[inline]
     pub fn large_page_offset(self) -> u21 {
-        u21::new((self.0 & (PAGE_SIZE_2MIB - 1)) as u32)
+        u21::new((self.0 & (ALIGN_2MIB - 1)) as u32)
     }
 
     /// Returns the VA range
@@ -177,9 +177,9 @@ impl From<u64> for VirtAddr {
     }
 }
 
-impl Into<u64> for VirtAddr {
-    fn into(self) -> u64 {
-        self.0
+impl From<VirtAddr> for u64 {
+    fn from(addr: VirtAddr) -> Self {
+        addr.0
     }
 }
 
@@ -427,9 +427,9 @@ impl From<u64> for PhysAddr {
     }
 }
 
-impl Into<u64> for PhysAddr {
-    fn into(self) -> u64 {
-        self.0
+impl From<PhysAddr> for u64 {
+    fn from(addr: PhysAddr) -> Self {
+        addr.0
     }
 }
 

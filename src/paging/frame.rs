@@ -3,7 +3,7 @@ use crate::addr::PhysAddr;
 use core::convert::TryFrom;
 use core::fmt;
 use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Sub, SubAssign};
+use core::ops::{Add, AddAssign, Range, Sub, SubAssign};
 
 /// A physical memory frame.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
@@ -47,6 +47,11 @@ impl<S: PageSize> Frame<S> {
     #[inline]
     pub fn of_addr(address: u64) -> Self {
         Self::containing_address(PhysAddr::new(address))
+    }
+
+    #[inline]
+    pub fn range_of(begin: u64, end: u64) -> Range<Self> {
+        Frame::of_addr(begin)..Frame::of_addr(end)
     }
 }
 

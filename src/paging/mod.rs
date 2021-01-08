@@ -2,11 +2,12 @@ pub use frame::Frame;
 pub use frame_alloc::{FrameAllocator, FrameDeallocator};
 pub use mapper::{MappedPageTable, Mapper, MapperAllSizes, RecursivePageTable};
 pub use page::Page;
-pub use table::{PageTable, PageTableFlags};
+pub use table::{PageTable, PageTableAttribute, PageTableEntry, PageTableFlags};
 
 pub mod frame;
 mod frame_alloc;
 pub mod mapper;
+pub mod memory_attribute;
 pub mod page;
 pub mod table;
 
