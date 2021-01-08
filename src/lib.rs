@@ -1,5 +1,6 @@
 #![no_std]
 #![feature(asm)]
+#![feature(llvm_asm)]
 #![feature(core_intrinsics)]
 #![feature(const_fn)]
 #![feature(bool_to_option)]
@@ -8,10 +9,10 @@
 
 pub mod addr;
 pub mod asm;
-pub mod paging;
-pub mod cache;
-pub mod registers;
 pub mod barrier;
-
+pub mod cache;
+pub mod paging;
+pub mod registers;
+pub mod translation;
 
 pub extern crate ux;
