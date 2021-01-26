@@ -40,7 +40,7 @@ pub trait Cache {
     fn cache_line_size() -> u64;
 
     /// Flush cache for the VA interval [start, end) in the shareability domain.
-    fn flush_range<A: sealed::Dsb + sealed::Isb + Copy>(start: usize, end: usize, domain: A) {
+    fn flush_range<A: sealed::Dsb>(start: usize, end: usize, domain: A) {
         let line_size = 4 << Self::cache_line_size();
         let mut addr = start & !(line_size - 1);
         while addr < end {
@@ -48,12 +48,12 @@ pub trait Cache {
             addr += line_size;
         }
         unsafe { dsb(domain) };
-        unsafe { isb(domain) };
+        unsafe { isb(SY) };
     }
 
     /// Flush cache for the VA interval [start, start + size) in the
     /// shareability domain.
-    fn flush_area<A: sealed::Dsb + sealed::Isb + Copy>(start: usize, size: usize, domain: A) {
+    fn flush_area<A: sealed::Dsb>(start: usize, size: usize, domain: A) {
         Self::flush_range(start, start + size, domain);
     }
 }

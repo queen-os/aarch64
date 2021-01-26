@@ -72,8 +72,8 @@ impl<S: PageSize> Page<S> {
     }
 
     #[inline]
-    pub fn range_of(begin: u64, end: u64) -> Range<Self> {
-        Page::of_addr(begin)..(Page::of_addr(end - 1) + 1)
+    pub fn range_of(start: u64, end: u64) -> Range<Self> {
+        Page::of_addr(start)..(Page::of_addr(end - 1) + 1)
     }
 }
 
