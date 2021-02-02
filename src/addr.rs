@@ -1,9 +1,11 @@
 use bit_field::BitField;
 use bitflags::_core::fmt::Formatter;
-use core::convert::{Into, TryInto};
-use core::fmt;
-use core::hash::Hash;
-use core::ops;
+use core::{
+    convert::{Into, TryInto},
+    fmt,
+    hash::Hash,
+    ops,
+};
 use ux::{u12, u21, u9};
 
 pub const ALIGN_4KIB: u64 = 0x0000_1000;
@@ -98,8 +100,8 @@ impl VirtAddr {
     /// See the `align_up` function for more information.
     #[inline]
     pub fn align_up<U>(self, align: U) -> Self
-        where
-            U: Into<u64>,
+    where
+        U: Into<u64>,
     {
         VirtAddr(align_up(self.0, align.into()))
     }
@@ -109,8 +111,8 @@ impl VirtAddr {
     /// See the `align_down` function for more information.
     #[inline]
     pub fn align_down<U>(self, align: U) -> Self
-        where
-            U: Into<u64>,
+    where
+        U: Into<u64>,
     {
         VirtAddr(align_down(self.0, align.into()))
     }
@@ -118,8 +120,8 @@ impl VirtAddr {
     /// Checks whether the virtual address has the demanded alignment.
     #[inline]
     pub fn is_aligned<U>(self, align: U) -> bool
-        where
-            U: Into<u64>,
+    where
+        U: Into<u64>,
     {
         self.align_down(align) == self
     }
@@ -179,6 +181,12 @@ impl VirtAddr {
 impl From<u64> for VirtAddr {
     fn from(num: u64) -> Self {
         VirtAddr(num)
+    }
+}
+
+impl From<usize> for VirtAddr {
+    fn from(num: usize) -> Self {
+        VirtAddr(num as u64)
     }
 }
 
@@ -404,8 +412,8 @@ impl PhysAddr {
     /// See the `align_up` function for more information.
     #[inline]
     pub fn align_up<U>(self, align: U) -> Self
-        where
-            U: Into<u64>,
+    where
+        U: Into<u64>,
     {
         PhysAddr(align_up(self.0, align.into()))
     }
@@ -415,8 +423,8 @@ impl PhysAddr {
     /// See the `align_down` function for more information.
     #[inline]
     pub fn align_down<U>(self, align: U) -> Self
-        where
-            U: Into<u64>,
+    where
+        U: Into<u64>,
     {
         PhysAddr(align_down(self.0, align.into()))
     }
@@ -424,8 +432,8 @@ impl PhysAddr {
     /// Checks whether the physical address has the demanded alignment.
     #[inline]
     pub fn is_aligned<U>(self, align: U) -> bool
-        where
-            U: Into<u64>,
+    where
+        U: Into<u64>,
     {
         self.align_down(align) == self
     }
@@ -434,6 +442,12 @@ impl PhysAddr {
 impl From<u64> for PhysAddr {
     fn from(num: u64) -> Self {
         PhysAddr(num)
+    }
+}
+
+impl From<usize> for PhysAddr {
+    fn from(num: usize) -> Self {
+        PhysAddr(num as u64)
     }
 }
 
