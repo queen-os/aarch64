@@ -39,7 +39,7 @@ pub struct PhysAddr(u64);
 
 impl VirtAddr {
     #[inline]
-    pub fn new(addr: u64) -> Self {
+    pub const fn new(addr: u64) -> Self {
         VirtAddr(addr)
     }
 
@@ -59,12 +59,17 @@ impl VirtAddr {
     }
 
     #[inline]
-    pub fn as_u64(self) -> u64 {
+    pub const fn as_u64(self) -> u64 {
         self.0
     }
 
     #[inline]
-    pub fn is_zero(self) -> bool {
+    pub const fn as_usize(self) -> usize {
+        self.0 as usize
+    }
+
+    #[inline]
+    pub const fn is_zero(self) -> bool {
         self.0 == 0
     }
 
@@ -360,7 +365,7 @@ impl fmt::Pointer for VirtAddr {
 
 impl PhysAddr {
     #[inline]
-    pub fn new(addr: u64) -> Self {
+    pub const fn new(addr: u64) -> Self {
         PhysAddr(addr)
     }
 
@@ -380,12 +385,17 @@ impl PhysAddr {
     }
 
     #[inline]
-    pub fn as_u64(self) -> u64 {
+    pub const fn as_u64(self) -> u64 {
         self.0
     }
 
     #[inline]
-    pub fn is_zero(self) -> bool {
+    pub const fn as_usize(self) -> usize {
+        self.0 as usize
+    }
+
+    #[inline]
+    pub const fn is_zero(self) -> bool {
         self.0 == 0
     }
 
