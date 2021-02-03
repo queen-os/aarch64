@@ -14,5 +14,6 @@ pub mod cache;
 pub mod paging;
 pub mod registers;
 pub mod translation;
+pub mod trap;
 
 pub extern crate ux;
