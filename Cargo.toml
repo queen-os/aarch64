@@ -11,11 +11,5 @@ cortex-a = "5.1"
 bit_field = "0.10"
 bitflags = "1.2"
 register = "1.0"
-
-[dependencies.cast]
-version = "0.2"
-default-features = false
-
-[dependencies.ux]
-default-features = false
-version = "0.1"
+cast = { version = "0.2", default-features = false }
+ux = { version = "0.1", default-features = false }
