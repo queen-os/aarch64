@@ -1,9 +1,11 @@
 use super::{PageSize, Size4KiB};
 use crate::addr::PhysAddr;
-use core::convert::TryFrom;
-use core::fmt;
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Range, Sub, SubAssign};
+use core::{
+    convert::TryFrom,
+    fmt,
+    marker::PhantomData,
+    ops::{Add, AddAssign, Range, Sub, SubAssign},
+};
 
 /// A physical memory frame.
 #[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]

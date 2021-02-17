@@ -170,9 +170,14 @@ impl<'a, P: PhysToVirt> Mapper<Size1GiB> for MappedPageTable<'a, P> {
         Ok(&p3[page.p3_index()])
     }
 
-    fn get_entry_mut(&mut self, page: Page<Size1GiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size1GiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
         let p4 = &mut self.level_4_table;
-        let p3 = self.page_table_walker.next_table_mut(&mut p4[page.p4_index()])?;
+        let p3 = self
+            .page_table_walker
+            .next_table_mut(&mut p4[page.p4_index()])?;
         Ok(&mut p3[page.p3_index()])
     }
 }
@@ -219,10 +224,17 @@ impl<'a, P: PhysToVirt> Mapper<Size2MiB> for MappedPageTable<'a, P> {
         Ok(&p2[page.p2_index()])
     }
 
-    fn get_entry_mut(&mut self, page: Page<Size2MiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size2MiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
         let p4 = &mut self.level_4_table;
-        let p3 = self.page_table_walker.next_table_mut(&mut p4[page.p4_index()])?;
-        let p2 = self.page_table_walker.next_table_mut(&mut p3[page.p3_index()])?;
+        let p3 = self
+            .page_table_walker
+            .next_table_mut(&mut p4[page.p4_index()])?;
+        let p2 = self
+            .page_table_walker
+            .next_table_mut(&mut p3[page.p3_index()])?;
         Ok(&mut p2[page.p2_index()])
     }
 }
@@ -270,11 +282,20 @@ impl<'a, P: PhysToVirt> Mapper<Size4KiB> for MappedPageTable<'a, P> {
         Ok(&p1[page.p1_index()])
     }
 
-    fn get_entry_mut(&mut self, page: Page<Size4KiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size4KiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
         let p4 = &mut self.level_4_table;
-        let p3 = self.page_table_walker.next_table_mut(&mut p4[page.p4_index()])?;
-        let p2 = self.page_table_walker.next_table_mut(&mut p3[page.p3_index()])?;
-        let p1 = self.page_table_walker.next_table_mut(&mut p2[page.p2_index()])?;
+        let p3 = self
+            .page_table_walker
+            .next_table_mut(&mut p4[page.p4_index()])?;
+        let p2 = self
+            .page_table_walker
+            .next_table_mut(&mut p3[page.p3_index()])?;
+        let p1 = self
+            .page_table_walker
+            .next_table_mut(&mut p2[page.p2_index()])?;
         Ok(&mut p1[page.p1_index()])
     }
 }

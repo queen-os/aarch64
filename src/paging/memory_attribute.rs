@@ -1,7 +1,9 @@
-//!Memory region attributes (D4.5, page 2174)
+//! Memory region attributes (D4.5, page 2174)
 
-use crate::paging::table::{PageTableAttribute, MEMORY_ATTRIBUTE};
-use crate::registers::*;
+use crate::{
+    paging::table::{PageTableAttribute, MEMORY_ATTRIBUTE},
+    registers::*,
+};
 
 pub trait MairType {
     const INDEX: u64;

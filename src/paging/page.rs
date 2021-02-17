@@ -1,9 +1,11 @@
 use super::{NotGiantPageSize, PageSize, Size1GiB, Size2MiB, Size4KiB};
 use crate::addr::{VirtAddr, VirtAddrRange};
-use core::convert::TryFrom;
-use core::fmt;
-use core::marker::PhantomData;
-use core::ops::{Add, AddAssign, Range, Sub, SubAssign};
+use core::{
+    convert::TryFrom,
+    fmt,
+    marker::PhantomData,
+    ops::{Add, AddAssign, Range, Sub, SubAssign},
+};
 use ux::u9;
 
 /// A virtual memory page.

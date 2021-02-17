@@ -90,7 +90,10 @@ impl<'a> Mapper<Size1GiB> for OffsetPageTable<'a> {
     }
 
     #[inline]
-    fn get_entry_mut(&mut self, page: Page<Size1GiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size1GiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
         self.inner.get_entry_mut(page)
     }
 }
@@ -130,7 +133,10 @@ impl<'a> Mapper<Size2MiB> for OffsetPageTable<'a> {
     }
 
     #[inline]
-    fn get_entry_mut(&mut self, page: Page<Size2MiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size2MiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
         self.inner.get_entry_mut(page)
     }
 }
@@ -170,7 +176,10 @@ impl<'a> Mapper<Size4KiB> for OffsetPageTable<'a> {
     }
 
     #[inline]
-    fn get_entry_mut(&mut self, page: Page<Size4KiB>) -> Result<&mut PageTableEntry, EntryGetError> {
+    fn get_entry_mut(
+        &mut self,
+        page: Page<Size4KiB>,
+    ) -> Result<&mut PageTableEntry, EntryGetError> {
         self.inner.get_entry_mut(page)
     }
 }

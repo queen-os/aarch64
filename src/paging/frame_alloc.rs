@@ -1,6 +1,6 @@
 //! Traits for abstracting away frame allocation and deallocation.
 
-use crate::paging::{PageSize, Frame};
+use crate::paging::{Frame, PageSize};
 
 /// A trait for types that can allocate a frame of memory.
 ///
