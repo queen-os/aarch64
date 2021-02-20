@@ -28,13 +28,13 @@ pub mod sealed {
 macro_rules! dmb_dsb {
     ($A:ident) => {
         impl sealed::Dmb for $A {
-            #[inline(always)]
+            #[inline]
             unsafe fn __dmb(&self) {
                 asm!(concat!("DMB ", stringify!($A)), options(nostack))
             }
         }
         impl sealed::Dsb for $A {
-            #[inline(always)]
+            #[inline]
             unsafe fn __dsb(&self) {
                 asm!(concat!("DSB ", stringify!($A)), options(nostack))
             }
@@ -53,7 +53,7 @@ dmb_dsb!(ISHST);
 dmb_dsb!(SY);
 
 impl sealed::Isb for SY {
-    #[inline(always)]
+    #[inline]
     unsafe fn __isb(&self) {
         asm!("ISB SY", options(nostack))
     }
@@ -62,7 +62,7 @@ impl sealed::Isb for SY {
 /// # Safety
 ///
 /// In your own hands, this is hardware land!
-#[inline(always)]
+#[inline]
 pub unsafe fn dmb<A>(arg: A)
 where
     A: sealed::Dmb,
@@ -73,7 +73,7 @@ where
 /// # Safety
 ///
 /// In your own hands, this is hardware land!
-#[inline(always)]
+#[inline]
 pub unsafe fn dsb<A>(arg: A)
 where
     A: sealed::Dsb,
@@ -84,7 +84,7 @@ where
 /// # Safety
 ///
 /// In your own hands, this is hardware land!
-#[inline(always)]
+#[inline]
 pub unsafe fn isb<A>(arg: A)
 where
     A: sealed::Isb,

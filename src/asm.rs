@@ -2,7 +2,7 @@ pub use cortex_a::asm::*;
 use cortex_a::regs::RegisterReadOnly;
 
 /// Returns the current stack pointer.
-#[inline(always)]
+#[inline]
 pub fn sp() -> *const u8 {
     let ptr: usize;
     unsafe {
@@ -14,7 +14,7 @@ pub fn sp() -> *const u8 {
 /// # Safety
 ///
 /// Returns the current point counter.
-#[inline(always)]
+#[inline]
 pub unsafe fn pc() -> usize {
     let pc: usize;
     asm!("adr {}, .", out(reg) pc, options(pure, nomem, nostack));
@@ -30,7 +30,7 @@ pub fn cpuid() -> usize {
 /// # Safety
 ///
 /// The halt function stops the processor until the next interrupt arrives
-#[inline(always)]
+#[inline]
 pub unsafe fn halt() {
     asm!("wfi", options(nomem, nostack));
 }
