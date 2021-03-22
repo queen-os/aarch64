@@ -145,8 +145,10 @@ impl UserContext {
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
     use crate::registers::{RegisterReadWrite, VBAR_EL1};
+    let vectors: u64;
+    asm!("adrp {}, __vectors", out(reg) vectors);
     // Set the exception vector address
-    VBAR_EL1.set(__vectors as u64);
+    VBAR_EL1.set(vectors);
 }
 
 /// Trap frame of kernel interrupt
@@ -183,6 +185,5 @@ pub struct TrapFrame {
 
 #[allow(improper_ctypes)]
 extern "C" {
-    fn __vectors();
     fn run_user(regs: &mut UserContext);
 }
