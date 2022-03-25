@@ -156,7 +156,7 @@ impl<S: PageSize> fmt::Debug for Page<S> {
     }
 }
 
-unsafe impl<S: PageSize> core::iter::Step for Page<S> {
+impl<S: PageSize> core::iter::Step for Page<S> {
     fn steps_between(start: &Self, end: &Self) -> Option<usize> {
         usize::try_from(*end - *start).ok()
     }

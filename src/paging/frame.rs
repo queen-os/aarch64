@@ -100,7 +100,7 @@ impl<S: PageSize> Sub<Frame<S>> for Frame<S> {
     }
 }
 
-unsafe impl<S: PageSize> core::iter::Step for Frame<S> {
+impl<S: PageSize> core::iter::Step for Frame<S> {
     fn steps_between(start: &Self, end: &Self) -> Option<usize> {
         usize::try_from(*end - *start).ok()
     }

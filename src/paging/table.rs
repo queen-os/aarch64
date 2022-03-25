@@ -1,15 +1,14 @@
 //! Abstractions for page tables and page table entries.
 #![allow(non_upper_case_globals)]
 
+use super::{Frame, PageSize, Size4KiB};
+use crate::addr::PhysAddr;
 use core::{
     fmt,
     ops::{Index, IndexMut},
 };
-use register::FieldValue;
+use tock_registers::fields::FieldValue;
 use ux::*;
-
-use super::{Frame, PageSize, Size4KiB};
-use crate::addr::PhysAddr;
 
 /// Memory attribute fields mask
 pub const MEMORY_ATTR_MASK: u64 =
@@ -143,7 +142,7 @@ impl fmt::Debug for PageTableEntry {
     }
 }
 
-register::register_bitfields! { u64,
+tock_registers::register_bitfields! { u64,
     // Memory attribute fields in the VMSAv8-64 translation table format descriptors (Page 2148~2152)
     pub MEMORY_ATTRIBUTE [
         /// Shareability field

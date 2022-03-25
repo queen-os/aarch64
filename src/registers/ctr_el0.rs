@@ -2,7 +2,10 @@
 //!
 //! Provides information about the architecture of the caches.
 
-use register::{cpu::RegisterReadWrite, register_bitfields};
+use tock_registers::{
+    interfaces::{Readable, Writeable},
+    register_bitfields,
+};
 
 register_bitfields! {u64,
     pub CTR_EL0 [
@@ -63,8 +66,17 @@ register_bitfields! {u64,
 
 pub struct Reg;
 
-impl RegisterReadWrite<u64, CTR_EL0::Register> for Reg {
+impl Readable for Reg {
+    type T = u64;
+    type R = CTR_EL0::Register;
+
     sys_coproc_read_raw!(u64, "CTR_EL0", "x");
+}
+
+impl Writeable for Reg {
+    type T = u64;
+    type R = CTR_EL0::Register;
+
     sys_coproc_write_raw!(u64, "CTR_EL0", "x");
 }
 

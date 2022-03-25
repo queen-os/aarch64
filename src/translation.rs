@@ -1,8 +1,10 @@
 use crate::{
     addr::{PhysAddr, VirtAddr},
+    barrier,
     paging::Frame,
     registers::*,
 };
+use core::arch::asm;
 
 /// Address Translate (Stage 1 EL1 Read).
 ///
@@ -10,17 +12,11 @@ use crate::{
 /// regardless of the TLB caching.
 #[inline]
 pub fn address_translate(vaddr: usize) -> usize {
-    let paddr: usize;
     unsafe {
-        llvm_asm!(
-            "at S1E1R, $1
-             mrs $0, par_el1"
-            : "=r"(paddr)
-            : "r"(vaddr)
-            :: "volatile"
-        );
+        asm!("at S1E1R, {}", in(reg) vaddr);
+        barrier::isb(barrier::SY);
     }
-    paddr
+    PAR_EL1.get() as usize
 }
 
 /// Read TTBRx_EL1 as Frame
@@ -73,12 +69,11 @@ pub fn invalidate_tlb_all() {
     // All stage 1 translations used at EL1, in the Inner Shareable shareability
     // domain.
     unsafe {
-        llvm_asm!(
+        asm!(
             "dsb ishst
              tlbi vmalle1is
              dsb ish
              isb"
-            :::: "volatile"
         );
     }
 }
@@ -88,12 +83,11 @@ pub fn invalidate_tlb_all() {
 pub fn local_invalidate_tlb_all() {
     // All stage 1 translations used at EL1
     unsafe {
-        llvm_asm!(
+        asm!(
             "dsb nshst
              tlbi vmalle1
              dsb nsh
              isb"
-            :::: "volatile"
         );
     }
 }
@@ -104,13 +98,12 @@ pub fn invalidate_tlb_vaddr(vaddr: VirtAddr) {
     // Translations used at EL1 for the specified address, for all ASID values,
     // in the Inner Shareable shareability domain.
     unsafe {
-        llvm_asm!(
+        asm!(
             "dsb ishst
-             tlbi vaae1is, $0
+             tlbi vaae1is, {}
              dsb ish
-             isb"
-            :: "r"(vaddr.as_u64() >> 12)
-            :: "volatile"
+             isb",
+            in(reg) vaddr.as_u64() >> 12
         );
     }
 }

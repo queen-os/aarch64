@@ -1,8 +1,9 @@
 use crate::{
     barrier::{dsb, isb, sealed},
-    registers::{RegisterReadWrite, CTR_EL0},
+    registers::CTR_EL0,
 };
-use core::marker::PhantomData;
+use core::{arch::asm, marker::PhantomData};
+use tock_registers::interfaces::Readable;
 
 pub use crate::barrier::{ISH, ISHST, SY};
 
@@ -126,7 +127,7 @@ macro_rules! define_cache_op {
             #[inline]
             fn flush_line_op(vaddr: usize) {
                 unsafe {
-                    asm!(concat!(cache_ins!($cache), " ", cache_op!($flush), "va", cache_point!($point), ", {}"),
+                    ::core::arch::asm!(concat!(cache_ins!($cache), " ", cache_op!($flush), "va", cache_point!($point), ", {}"),
                         in(reg) vaddr);
                 }
             }

@@ -1,4 +1,7 @@
-use register::{cpu::RegisterReadWrite, register_bitfields};
+use tock_registers::{
+    interfaces::{Readable, Writeable},
+    register_bitfields,
+};
 
 register_bitfields! {u32,
     pub ICC_PMR_EL1 [
@@ -10,8 +13,17 @@ register_bitfields! {u32,
 
 pub struct Reg;
 
-impl RegisterReadWrite<u32, ICC_PMR_EL1::Register> for Reg {
+impl Readable for Reg {
+    type T = u32;
+    type R = ICC_PMR_EL1::Register;
+
     sys_coproc_read_raw!(u32, "ICC_PMR_EL1", "x");
+}
+
+impl Writeable for Reg {
+    type T = u32;
+    type R = ICC_PMR_EL1::Register;
+
     sys_coproc_write_raw!(u32, "ICC_PMR_EL1", "x");
 }
 

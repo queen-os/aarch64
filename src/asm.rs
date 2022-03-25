@@ -1,14 +1,21 @@
+#[allow(unused_imports)]
+use core::arch::asm;
+use tock_registers::interfaces::Readable;
+
 pub use cortex_a::asm::*;
-use cortex_a::regs::RegisterReadOnly;
 
 /// Returns the current stack pointer.
 #[inline]
 pub fn sp() -> *const u8 {
-    let ptr: usize;
+    #[cfg(target_arch = "aarch64")]
     unsafe {
+        let ptr: usize;
         asm!("mov {0}, sp", out(reg) ptr, options(pure, nomem, nostack));
+        ptr as *const u8
     }
-    ptr as *const u8
+
+    #[cfg(not(target_arch = "aarch64"))]
+    unimplemented!()
 }
 
 /// # Safety
@@ -16,21 +23,27 @@ pub fn sp() -> *const u8 {
 /// Returns the current point counter.
 #[inline]
 pub unsafe fn pc() -> usize {
-    let pc: usize;
-    asm!("adr {}, .", out(reg) pc, options(pure, nomem, nostack));
-    pc
+    #[cfg(target_arch = "aarch64")]
+    {
+        let pc: usize;
+        asm!("adr {}, .", out(reg) pc, options(pure, nomem, nostack));
+        pc
+    }
+
+    #[cfg(not(target_arch = "aarch64"))]
+    unimplemented!()
 }
 
 /// CPU id
 #[inline]
 pub fn cpuid() -> usize {
-    (cortex_a::regs::MPIDR_EL1.get() & 3) as usize
+    (crate::registers::MPIDR_EL1.get() & 3) as usize
 }
 
 /// # Safety
 ///
 /// The halt function stops the processor until the next interrupt arrives
 #[inline]
-pub unsafe fn halt() {
-    asm!("wfi", options(nomem, nostack));
+pub fn halt() {
+    wfi();
 }

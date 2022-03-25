@@ -1,4 +1,4 @@
-use register::{cpu::RegisterReadOnly, register_bitfields};
+use tock_registers::{interfaces::Readable, register_bitfields};
 
 register_bitfields! {u32,
     ICC_IAR1_EL1 [
@@ -9,7 +9,10 @@ register_bitfields! {u32,
 
 pub struct Reg;
 
-impl RegisterReadOnly<u32, ICC_IAR1_EL1::Register> for Reg {
+impl Readable for Reg {
+    type T = u32;
+    type R = ICC_IAR1_EL1::Register;
+
     sys_coproc_read_raw!(u32, "ICC_IAR1_EL1", "x");
 }
 

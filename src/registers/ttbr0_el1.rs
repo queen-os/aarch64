@@ -1,24 +1,13 @@
-// Copyright (c) 2018 by the author(s)
-//
-// =============================================================================
-//
-// Licensed under either of
-//   - Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
-//   - MIT License (http://opensource.org/licenses/MIT)
-// at your option.
-//
-// =============================================================================
-//
-// Author(s):
-//   - Andre Richter <andre.o.richter@gmail.com>
-
 //! Translation Table Base Register 0 - EL1
 //!
 //! Holds the base address of the translation table for the initial lookup for
 //! stage 1 of the translation of an address from the lower VA range in the
 //! EL1&0 translation regime, and other information for this translation regime.
 
-use register::{cpu::RegisterReadWrite, register_bitfields};
+use tock_registers::{
+    interfaces::{Readable, Writeable},
+    register_bitfields,
+};
 
 register_bitfields! {u64,
     pub TTBR0_EL1 [
@@ -39,8 +28,17 @@ register_bitfields! {u64,
 
 pub struct Reg;
 
-impl RegisterReadWrite<u64, TTBR0_EL1::Register> for Reg {
+impl Readable for Reg {
+    type T = u64;
+    type R = TTBR0_EL1::Register;
+
     sys_coproc_read_raw!(u64, "TTBR0_EL1", "x");
+}
+
+impl Writeable for Reg {
+    type T = u64;
+    type R = TTBR0_EL1::Register;
+
     sys_coproc_write_raw!(u64, "TTBR0_EL1", "x");
 }
 

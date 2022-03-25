@@ -16,7 +16,7 @@ macro_rules! __read_raw {
                 () => {
                     let reg;
                     unsafe {
-                        asm!(concat!($asm_instr, " {reg:", $asm_width, "}, ", $asm_reg_name), reg = out(reg) reg, options(nomem, nostack));
+                        ::core::arch::asm!(concat!($asm_instr, " {reg:", $asm_width, "}, ", $asm_reg_name), reg = out(reg) reg, options(nomem, nostack));
                     }
                     reg
                 }
@@ -38,7 +38,7 @@ macro_rules! __write_raw {
                 #[cfg(target_arch = "aarch64")]
                 () => {
                     unsafe {
-                        asm!(concat!($asm_instr, " ", $asm_reg_name, ", {reg:", $asm_width, "}"), reg = in(reg) value, options(nomem, nostack))
+                        ::core::arch::asm!(concat!($asm_instr, " ", $asm_reg_name, ", {reg:", $asm_width, "}"), reg = in(reg) value, options(nomem, nostack))
                     }
                 }
 

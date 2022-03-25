@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 //
-// Copyright (c) 2018-2020 by the author(s)
+// Copyright (c) 2018-2022 by the author(s)
 //
 // Author(s):
 //   - Andre Richter <andre.o.richter@gmail.com>
 
-// Borrow implementations from the pending upstream ACLE implementation until it is merged.
-// Afterwards, we'll probably just reexport them, hoping that the API doesn't change.
-//
-// https://github.com/rust-lang-nursery/stdsimd/pull/557
+//! Barrier functions.
 
-#[allow(clippy::missing_safety_doc)]
-pub mod sealed {
+pub(crate) mod sealed {
     pub trait Dmb {
         unsafe fn __dmb(&self);
     }
@@ -28,24 +24,38 @@ pub mod sealed {
 macro_rules! dmb_dsb {
     ($A:ident) => {
         impl sealed::Dmb for $A {
-            #[inline]
+            #[inline(always)]
             unsafe fn __dmb(&self) {
-                asm!(concat!("DMB ", stringify!($A)), options(nostack))
+                match () {
+                    #[cfg(target_arch = "aarch64")]
+                    () => {
+                        core::arch::asm!(concat!("DMB ", stringify!($A)), options(nostack))
+                    }
+
+                    #[cfg(not(target_arch = "aarch64"))]
+                    () => unimplemented!(),
+                }
             }
         }
         impl sealed::Dsb for $A {
-            #[inline]
+            #[inline(always)]
             unsafe fn __dsb(&self) {
-                asm!(concat!("DSB ", stringify!($A)), options(nostack))
+                match () {
+                    #[cfg(target_arch = "aarch64")]
+                    () => {
+                        core::arch::asm!(concat!("DSB ", stringify!($A)), options(nostack))
+                    }
+
+                    #[cfg(not(target_arch = "aarch64"))]
+                    () => unimplemented!(),
+                }
             }
         }
     };
 }
-#[derive(Copy, Clone)]
+
 pub struct SY;
-#[derive(Copy, Clone)]
 pub struct ISH;
-#[derive(Copy, Clone)]
 pub struct ISHST;
 
 dmb_dsb!(ISH);
@@ -53,16 +63,24 @@ dmb_dsb!(ISHST);
 dmb_dsb!(SY);
 
 impl sealed::Isb for SY {
-    #[inline]
+    #[inline(always)]
     unsafe fn __isb(&self) {
-        asm!("ISB SY", options(nostack))
+        match () {
+            #[cfg(target_arch = "aarch64")]
+            () => {
+                core::arch::asm!("ISB SY", options(nostack))
+            }
+
+            #[cfg(not(target_arch = "aarch64"))]
+            () => unimplemented!(),
+        }
     }
 }
 
 /// # Safety
 ///
 /// In your own hands, this is hardware land!
-#[inline]
+#[inline(always)]
 pub unsafe fn dmb<A>(arg: A)
 where
     A: sealed::Dmb,
@@ -73,7 +91,7 @@ where
 /// # Safety
 ///
 /// In your own hands, this is hardware land!
-#[inline]
+#[inline(always)]
 pub unsafe fn dsb<A>(arg: A)
 where
     A: sealed::Dsb,
@@ -84,7 +102,7 @@ where
 /// # Safety
 ///
 /// In your own hands, this is hardware land!
-#[inline]
+#[inline(always)]
 pub unsafe fn isb<A>(arg: A)
 where
     A: sealed::Isb,

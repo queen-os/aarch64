@@ -1,3 +1,7 @@
+#[allow(unused_imports)]
+use core::arch::{asm, global_asm};
+
+#[cfg(target_arch = "aarch64")]
 global_asm!(include_str!("trap.S"));
 
 /// Saved registers on a trap.
@@ -144,11 +148,17 @@ impl UserContext {
 ///
 /// You **MUST NOT** modify these registers later.
 pub unsafe fn init() {
-    use crate::registers::{RegisterReadWrite, VBAR_EL1};
-    let vectors: u64;
-    asm!("adrp {}, __vectors", out(reg) vectors);
-    // Set the exception vector address
-    VBAR_EL1.set(vectors);
+    #[cfg(target_arch = "aarch64")]
+    {
+        use crate::registers::{Writeable, VBAR_EL1};
+        let vectors: u64;
+        asm!("adrp {}, __vectors", out(reg) vectors);
+        // Set the exception vector address
+        VBAR_EL1.set(vectors);
+    }
+
+    #[cfg(not(target_arch = "aarch64"))]
+    unimplemented!()
 }
 
 /// Trap frame of kernel interrupt

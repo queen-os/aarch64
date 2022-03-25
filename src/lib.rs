@@ -1,12 +1,7 @@
 #![no_std]
-#![feature(asm)]
-#![feature(llvm_asm)]
 #![feature(core_intrinsics)]
-#![feature(const_fn)]
 #![feature(bool_to_option)]
 #![feature(step_trait)]
-#![feature(step_trait_ext)]
-#![feature(global_asm)]
 
 pub mod addr;
 pub mod asm;
